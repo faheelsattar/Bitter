@@ -1,0 +1,34 @@
+Array method one => Extracting a value at a particular index
+example: If it was a normal array all we had to do was array[_index] and
+we would get the value.
+
+Now if i want to achieve the same thing with just a uint256 as a bitmap i would need
+to make a generalized formula which would do correct bit shifting to extract the value.
+explain?
+
+example i had an array like uint256 [] arr =[5, 4, 1, 0, 6, 1] 
+i would bitmap it into a uint256 like uint256 arr = 0x541061
+formula to retrieve a number from index =>  (arr >> (_index << 2)) & 0xf
+
+why 2? cuz the max number in my array is 6 which can be represented in 4 bits(0110)
+
+index = 3
+formula =(arr >> (_index << 2)) & 0xf
+simulation =>   index    5   4   3   2   1   0
+                value    5   4   1   0   6   1
+
+(arr >> (3 << 2)) & 0xf    // 3 << 2 = 3*2^2 = 12 (exactly what i want as the 
+                                                  index if shifted right in the next step 
+                                                  by 12 will remove all the bits before it(12)
+                                                  causing the index 3 to be the last digit)
+(arr >> 12) & 0xf
+
+arr >> 12 = 000541   // 12 bits were right shifted which elemenated 0, 6 and 1 
+
+000541 & 0xf(and masking to retrieve the bits) =  
+                            (arr in hex)        0    0    0    5    4    1    
+                            (in bits)         0000 0000 0000 0101 0100 0001 
+                            (0xf)             0000 0000 0000 0000 0000 1111 
+                            (bitwise and)  (  0000 0000 0000 0000 0000 0001) = 1
+
+                            "" 1 was actually the value at index 3""
