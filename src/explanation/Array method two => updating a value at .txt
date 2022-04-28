@@ -1,0 +1,46 @@
+Array method two => updating a value at a particular index
+Inorder to update a particular value in array at any index we most probably will do
+arr[index] = 3
+
+In order to achieve the same scenario with bitmaps i created the formula:
+
+        1) shiftBy = _index << 2;
+        2) hollow = _array & (0xffffff ^ (0xf << shiftBy));
+        3) result = hollow | (_num << shiftBy);
+simulation =>
+arr = 0x541061
+index = 3
+number to update it with = 8
+1) shiftBy = _index << 2; is the same as previous example refer to example 1 shiftBy = 12
+
+2) hollow = _array & (0xffffff ^ (0xf << shiftBy)); // sidenote the total number of f's in xor depend on total array
+                                                    // length which is to be figured out to calculate dynamically  
+
+(0xf << 12) == 0000 0000 1111 0000 0000 0000
+(0xffffff) ^(0xf << shiftBy))                    // in solidity we cant do bitwise negation so
+                                                 // inorder to replicate it take a xor will all 1's
+
+what is the point of this expression (0xffffff) ^(0xf << shiftBy)) ?
+ans: well i wanted to create a 0000 bits in place of my index 3 so i can then later 
+bitwise or (|) it to add the number i was going to update it with
+
+                                 5    4    3    2    1    0 
+(0xffffff) ^(0xf << shiftBy)) = 1111 1111 0000 1111 1111 1111  // hollow(0000) at index 3
+
+                                                    5    4    3    2    1    0
+hollow = _array & (0xffffff) ^ (0xf << shiftBy)) = 0101 0100 0000 0000 0110 0001 // look how all the
+                                                                                //  numbers are restored to original excpet for index 3 which is zero                 
+
+3) result = hollow | (_num << shiftBy);
+
+(_num << shiftBy) = 8 << 12   =  5    4     3    2   1    0
+                                0000 0000 1000 0000 0000 0000
+
+hollow | (_num << shiftBy) (or masking to set the bits) =
+                                                         5    4    3    2     1   0 
+                                                        0101 0100 0000 0000 0110 0001
+                                                        0000 0000 1000 0000 0000 0000
+                        (bitwise or) (0101 0100 1000 0000 0110 0001) = 548061 // We succefully removed 1 from index 3 and updated it with 8
+
+Before updating = 541061
+After updating =  548061
